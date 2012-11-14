@@ -23,10 +23,11 @@ import nltk
 import pickle
 import time
 
-# First time
-# Q = "DTU"
-# url_list = []
-# Follewing times
+# First time?
+#Q = "DTU"
+#url_list = []
+#pickle.dump((Q,url_list),open("url_list.pydata", "wb" ))
+
 Q, url_list = pickle.load(open("url_list.pydata", "rb" ))
 
 while len(url_list) < 10000:

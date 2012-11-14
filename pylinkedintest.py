@@ -5,8 +5,8 @@ import time, os, simplejson
 # Fill the keys and secrets you retrieved after registering your app
 api_key      =   'zt33uu6fiiw8'
 secret_key  =   '5e7rUflDxDLhXPYh'
-user_token           =   '134d9126-f72a-48fa-81de-69e160dd4466'
-user_secret          =   'a4a0f762-1ee6-46c7-a3de-96e522d6e4a7'
+user_token           =   'd6085e21-fa8c-4eab-9cd4-8709053ddacf'
+user_secret          =   '79d0247d-b2e5-46b9-9a36-2ab90bf6b65f'
  
 # Use your API key and secret to instantiate consumer object
 consumer = oauth.Consumer(api_key, secret_key)

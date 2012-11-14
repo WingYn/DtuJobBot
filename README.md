@@ -1,4 +1,4 @@
 DtuJobBot
 =========
 
-Uses you linked in profile to find relevant jobs 
+Uses you LinkedIn profile to find relevant jobs 

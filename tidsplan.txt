@@ -1,7 +1,7 @@
 14. | Research på LinkedIn netwærk (Sin)
     | - Kan man få connections i 2 led?
     | - Kan man søge efter ens Facebook-venner og på den måde bygge en brugbar graf?
-	| - Kan man søge efter skills og bruge personer som er tættest til at bygge en brugbar graf?
+	| - Kan man søge efter skills (eller uddannelsessted) og bruge personer som er tættest til at bygge en brugbar graf?
 	| Skaf/crawl stort classification-dataset (Helge)
 15. |
 16. |

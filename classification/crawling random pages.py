@@ -23,12 +23,12 @@ import nltk
 import pickle
 import time
 
-# First time?
-#Q = "DTU"
-#url_list = []
-#pickle.dump((Q,url_list),open("url_list.pydata", "wb" ))
-
-Q, url_list = pickle.load(open("url_list.pydata", "rb" ))
+# Continue where we left
+try:
+    Q, url_list = pickle.load(open("url_list.pydata", "rb" ))
+except IOError:
+    Q = "DTU"
+    url_list = []
 
 while len(url_list) < 10000:
     # Sending GET request

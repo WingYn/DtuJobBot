@@ -8,8 +8,15 @@ handlers:
 - url: /favicon\.ico
   static_files: favicon.ico
   upload: favicon\.ico
+  
+- url: /miserables\.json
+  static_files: miserables.json
+  upload: miserables\.json
 
-- url: .*
+- url: /graph
+  script: graph.app
+  
+- url: / 
   script: main.app
 
 libraries:

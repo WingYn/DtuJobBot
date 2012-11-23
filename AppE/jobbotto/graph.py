@@ -53,8 +53,8 @@ var width = 500,
 var color = d3.scale.category20();
 
 var force = d3.layout.force()
-    .charge(-200)
-    .linkDistance(40)
+    .charge(-500)
+    .linkDistance(1)
     .linkStrength(0.6)
     .size([width, height]);
 

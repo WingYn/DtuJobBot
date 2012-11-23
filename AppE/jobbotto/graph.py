@@ -10,11 +10,22 @@ class MainHandler(webapp2.RequestHandler):
      
     def get(self):
         G=nx.read_graphml('g.xml')
+        G = G.to_undirected()
+         
         for n in G.nodes():
             G.node[n]['name'] = n
+            G.node[n]['central'] = 0
         #jsonGraph = json.dumps(dict(nodes=[G.node[n] for n in G.nodes()],links=[{'source':u,'target':v, 'value':1} for u,v in G.edges()]))
         #G = MainHandler.findCommunity(self, G, 'Sin')
-        G = ga.groupGraph(G, 'Sin')    
+        
+        G, numOfGroups = ga.groupGraph(G, 'Sin')
+        bm, em, cm, dm = ga.Centrality(G, 'Sin')
+        
+        G.node[bm]['central'] =  1
+        G.node[em]['central'] =  2
+        G.node[cm]['central'] =  3
+        G.node[dm]['central'] =  4
+        
         jsonGraph = json_graph.dumps(G)
         self.response.out.write("""<!DOCTYPE html>
 <meta charset="utf-8">
@@ -59,7 +70,7 @@ function drawG(graph) {
 
   var link = svg.selectAll("line.link")
       .data(graph.links)
-    .enter().append("line")
+      .enter().append("line")
       .attr("class", "link")
       .style("stroke-width", function(d) { return Math.sqrt(d.value); });
 
@@ -69,6 +80,8 @@ function drawG(graph) {
       .attr("class", "node")
       .attr("r", 5)
       .style("fill", function(d) { return color(d.group); })
+      .style("stroke", function(d) { return color(d.group + d.central); })
+      .style("stroke-width", "4")
       .call(force.drag);
 
   node.append("title")

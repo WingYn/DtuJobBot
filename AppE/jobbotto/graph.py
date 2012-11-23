@@ -20,6 +20,7 @@ class MainHandler(webapp2.RequestHandler):
         
         G, numOfGroups = ga.groupGraph(G, 'Sin')
         bm, em, cm, dm = ga.Centrality(G, 'Sin')
+
         
         G.node[bm]['central'] =  1
         G.node[em]['central'] =  2
@@ -46,14 +47,15 @@ class MainHandler(webapp2.RequestHandler):
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script>
 
-var width = 960,
+var width = 500,
     height = 500;
 
 var color = d3.scale.category20();
 
 var force = d3.layout.force()
-    .charge(-120)
-    .linkDistance(30)
+    .charge(-200)
+    .linkDistance(40)
+    .linkStrength(0.6)
     .size([width, height]);
 
 var svg = d3.select("body").append("svg")
@@ -88,13 +90,22 @@ function drawG(graph) {
       .text(function(d) { return d.name; });
 
   force.on("tick", function() {
+  
+    for (var i=0;i<graph.nodes.length;i++)
+    {
+        if(graph.nodes[i].group == 0){
+            graph.nodes[i].x = width / 2;
+            graph.nodes[i].y = height / 2;
+        }
+    }
+  
     link.attr("x1", function(d) { return d.source.x; })
         .attr("y1", function(d) { return d.source.y; })
         .attr("x2", function(d) { return d.target.x; })
         .attr("y2", function(d) { return d.target.y; });
 
-    node.attr("cx", function(d) { return d.x; })
-        .attr("cy", function(d) { return d.y; });
+    node.attr("cx", function(d) {return d.x; })
+        .attr("cy", function(d) {return d.y; });
   });
 }
 

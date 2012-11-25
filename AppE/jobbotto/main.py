@@ -31,6 +31,7 @@ import logging
 import networkx as nx
 import json
 import urllib
+import graphAnalys as ga
 # import KeyError
 
 class MainHandler(webapp.RequestHandler):
@@ -112,8 +113,11 @@ class MainHandler(webapp.RequestHandler):
                       ba = s + " " + b
                       g.add_edge(v.encode("latin-1"), ba.encode("latin-1"))
           except KeyError:
-            print "ble"
-
+            print "ble" 
+        
+        
+      
+      
       url = "http://api.linkedin.com/v1/people/~:(skills)"
       data = client.make_request(url, token = user_token, secret = user_secret, additional_params={"format":"json" })
       logging.info(data)
@@ -210,7 +214,12 @@ class MainHandler(webapp.RequestHandler):
                     g.add_edge(v.encode("latin-1"), ba.encode("latin-1"))
         except KeyError:
           print "ble"
-
+          
+    #her #g for graph
+    if mode == "verify":
+        outP = ga.DrawGraph(g, user_name)
+        self.response.out.write(outP)
+        
     if mode == "linkedin":
       profile_url = "http://api.linkedin.com/v1/people/~"
       

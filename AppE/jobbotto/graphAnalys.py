@@ -9,7 +9,14 @@ def groupGraph(G, userNodeId):
     G.node[userNodeId]['group'] = 0
     Gc = nx.Graph(G)
     Gc.remove_node(userNodeId)
-    partition = community.best_partition(Gc)
+    
+    if len(Gc.edges()) < 1:
+        partition = {}
+        for n in Gc.nodes():
+            partition[n] = 1
+    else:
+        partition = community.best_partition(Gc)
+    
     for nodes in partition.keys():
         G.node[nodes]['group'] = partition[nodes] + 1
     
@@ -72,7 +79,8 @@ def Centrality(G, userNodeId):
     
 def DrawGraph(G, userNodeId):
     #her
-    #G=nx.read_graphml('newGraph.xml')
+    userNodeId = 'Sin'
+    G=nx.read_graphml('newGraph.xml')
     G = G.to_undirected()
          
     for n in G.nodes():

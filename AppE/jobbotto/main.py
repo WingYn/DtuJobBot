@@ -217,9 +217,12 @@ class MainHandler(webapp.RequestHandler):
           
     #her #g for graph
     if mode == "verify":
-        outP = ga.DrawGraph(g, user_name)
-        self.response.out.write(outP)
-        
+        if len(g.nodes()) > 2 and len(g.edges()) > 2 :
+            outP = ga.DrawGraph(g, user_name)
+            self.response.out.write(outP)
+        else: 
+            self.response.out.write("No Network")
+            
     if mode == "linkedin":
       profile_url = "http://api.linkedin.com/v1/people/~"
       

@@ -79,8 +79,8 @@ def Centrality(G, userNodeId):
     
 def DrawGraph(G, userNodeId):
     #her
-    userNodeId = 'Sin'
-    G=nx.read_graphml('newGraph.xml')
+    #userNodeId = 'Sin'
+    #G=nx.read_graphml('newGraph.xml')
     G = G.to_undirected()
          
     for n in G.nodes():

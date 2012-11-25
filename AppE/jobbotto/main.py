@@ -28,6 +28,10 @@ from google.appengine.ext import webapp
 from google.appengine.ext.webapp import util
 
 import logging
+import networkx as nx
+import json
+import urllib
+# import KeyError
 
 class MainHandler(webapp.RequestHandler):
 
@@ -47,8 +51,7 @@ class MainHandler(webapp.RequestHandler):
     # authenticated with Twitter.
     callback_url = "%s/verify" % self.request.host_url
 
-    client = oauth.LinkedInClient(application_key, application_secret,
-        callback_url)
+    client = oauth.LinkedInClient(application_key, application_secret, callback_url)
 
     if mode == "login":
       return self.redirect(client.get_authorization_url())
@@ -58,8 +61,155 @@ class MainHandler(webapp.RequestHandler):
       auth_verifier = self.request.get("oauth_verifier")
       auth_token_secret = self.request.get("oauth_token_secret")
       user_info = client.get_user_info(auth_token, auth_verifier=auth_verifier)
-      self.response.out.write("<br />oauth_token_secret"+auth_token_secret+"<br />oauth_token: "+auth_token+"<br />oauth_verifier: "+auth_verifier+"<br />")
-      return self.response.out.write(user_info)
+      # self.response.out.write("<br /> oauth_token_secret"+auth_token_secret+"<br />oauth_token: "+auth_token+"<br />oauth_verifier: "+auth_verifier+"<br />")
+      print user_info['token'], user_info['secret']
+      url = "http://api.linkedin.com/v1/people/~:(skills)"
+      connectionurl = "http://api.linkedin.com/v1/people/~/connections"
+      # print auth_token, auth_token_secret
+      user_token = user_info['token']
+      user_secret = user_info['secret']
+      user_name = user_info['name']
+      data = client.make_request(url, token = user_token, secret = user_secret, additional_params={"format":"json" })
+      # print data.content
+
+
+      g = nx.DiGraph()
+      firstDegreeConnectionsId = {}
+
+      data = client.make_request(connectionurl, token = user_token, secret = user_secret, additional_params={"format":"json" })
+      dictionary = json.loads(data.content)
+      # logging.info("value of my var is %s", dictionary)
+      firstDegreeConnections = []
+      for v in dictionary['values']:
+        s = v['firstName']
+        s = s.encode('ascii', 'ignore')
+        b = v['lastName']
+        b = b.encode('ascii', 'ignore')
+        ba = s + " " + b
+        c = v['id']
+        c = c.encode('ascii', 'ignore')
+        firstDegreeConnectionsId[c] = ba
+        firstDegreeConnections.append(ba)
+      for i in firstDegreeConnections:
+        me = user_name
+        g.add_edge(me.encode("latin-1"), i.encode("latin-1"))
+
+
+      for k, v in firstDegreeConnectionsId.iteritems():
+          testurl = "http://api.linkedin.com/v1/people/id=%s:(relation-to-viewer:(related-connections))" % k
+          data = client.make_request(connectionurl, token = user_token, secret = user_secret, additional_params={"format":"json" })
+          jsondict = json.loads(data.content)
+          try:
+            for k, vv in jsondict['relationToViewer'].iteritems():
+              if k == 'relatedConnections':
+                for keyInRelatedConnections, valuesInRelatedConnection in vv.iteritems():
+                  if keyInRelatedConnections == 'values':
+                    for element in valuesInRelatedConnection:
+                      s = element['firstName']
+                      s = s.encode('ascii', 'ignore')
+                      b = element['lastName']
+                      b = b.encode('ascii', 'ignore')
+                      ba = s + " " + b
+                      g.add_edge(v.encode("latin-1"), ba.encode("latin-1"))
+          except KeyError:
+            print "ble"
+
+      url = "http://api.linkedin.com/v1/people/~:(skills)"
+      data = client.make_request(url, token = user_token, secret = user_secret, additional_params={"format":"json" })
+      logging.info(data)
+      dictionary = json.loads(data.content)
+      listOfSkills = []
+      for value in dictionary['skills']['values']:
+        for key, skill in value['skill'].iteritems():
+          listOfSkills.append(skill)
+      # logging.info(listOfSkills)
+
+      secondDegreeRelationIdsWithSkillSearchDict = {}
+
+      listOfSkills = listOfSkills[:5]
+
+      for i in listOfSkills:
+        i = urllib.quote_plus(i)
+        url = "http://api.linkedin.com/v1/people-search:(people:(relation-to-viewer,id,first-name,last-name,location:(name,country:(code),postal-code),connections))"
+        data = client.make_request(url, token = user_token, secret = user_secret, additional_params={"facets":"network", "facet":"network,S", "format":"json", "start" :"0", "count" : "25", "keywords" : "%s" % i})
+        jsondict = json.loads(data.content)
+        for k, b in jsondict['people'].iteritems():
+          if k == 'values':
+            for v in b:
+              s = v['firstName']
+              s = s.encode('ascii', 'ignore')
+              b = v['lastName']
+              b = b.encode('ascii', 'ignore')
+              ba = s + " " + b
+              c = v['id']
+              c = c.encode('ascii', 'ignore')
+              secondDegreeRelationIdsWithSkillSearchDict[c] = ba
+      for i in listOfSkills:
+        i = urllib.quote_plus(i)
+        url = "http://api.linkedin.com/v1/people-search:(people:(relation-to-viewer,id,first-name,last-name,location:(name,country:(code),postal-code),connections))"
+        data = client.make_request(url, token = user_token, secret = user_secret, additional_params={"facets":"network", "facet":"network,S", "format":"json", "start" :"25", "count" : "25", "keywords" : "%s" % i})
+        jsondict = json.loads(data.content)
+        for k, b in jsondict['people'].iteritems():
+          if k == 'values':
+            for v in b:
+              s = v['firstName']
+              s = s.encode('ascii', 'ignore')
+              b = v['lastName']
+              b = b.encode('ascii', 'ignore')
+              ba = s + " " + b
+              c = v['id']
+              c = c.encode('ascii', 'ignore')
+              secondDegreeRelationIdsWithSkillSearchDict[c] = ba
+      for i in listOfSkills:
+        i = urllib.quote_plus(i)
+        url = "http://api.linkedin.com/v1/people-search:(people:(relation-to-viewer,id,first-name,last-name,location:(name,country:(code),postal-code),connections))"
+        data = client.make_request(url, token = user_token, secret = user_secret, additional_params={"facets":"network", "facet":"network,S", "format":"json", "start" :"50", "count" : "25", "keywords" : "%s" % i})
+        jsondict = json.loads(data.content)
+        for k, b in jsondict['people'].iteritems():
+          if k == 'values':
+            for v in b:
+              s = v['firstName']
+              s = s.encode('ascii', 'ignore')
+              b = v['lastName']
+              b = b.encode('ascii', 'ignore')
+              ba = s + " " + b
+              c = v['id']
+              c = c.encode('ascii', 'ignore')
+              secondDegreeRelationIdsWithSkillSearchDict[c] = ba
+      for i in listOfSkills:
+        i = urllib.quote_plus(i)
+        url = "http://api.linkedin.com/v1/people-search:(people:(relation-to-viewer,id,first-name,last-name,location:(name,country:(code),postal-code),connections))"
+        data = client.make_request(url, token = user_token, secret = user_secret, additional_params={"facets":"network", "facet":"network,S", "format":"json", "start" :"50", "count" : "25", "keywords" : "%s" % i})
+        jsondict = json.loads(data.content)
+        for k, b in jsondict['people'].iteritems():
+          if k == 'values':
+            for v in b:
+              s = v['firstName']
+              s = s.encode('ascii', 'ignore')
+              b = v['lastName']
+              b = b.encode('ascii', 'ignore')
+              ba = s + " " + b
+              c = v['id']
+              c = c.encode('ascii', 'ignore')
+              secondDegreeRelationIdsWithSkillSearchDict[c] = ba
+      for k, v in secondDegreeRelationIdsWithSkillSearchDict.iteritems():
+        url = "http://api.linkedin.com/v1/people/id=%s:(relation-to-viewer:(related-connections))" % k
+        data = client.make_request(url, token = user_token, secret = user_secret, additional_params={"format":"json"})
+        jsondict = json.loads(data.content)
+        try:
+          for k, vv in jsondict['relationToViewer'].iteritems():
+            if k == 'relatedConnections':
+              for keyInRelatedConnections, valuesInRelatedConnection in vv.iteritems():
+                if keyInRelatedConnections == 'values':
+                  for element in valuesInRelatedConnection:
+                    s = element['firstName']
+                    s = s.encode('ascii', 'ignore')
+                    b = element['lastName']
+                    b = b.encode('ascii', 'ignore')
+                    ba = s + " " + b
+                    g.add_edge(v.encode("latin-1"), ba.encode("latin-1"))
+        except KeyError:
+          print "ble"
 
     if mode == "linkedin":
       profile_url = "http://api.linkedin.com/v1/people/~"

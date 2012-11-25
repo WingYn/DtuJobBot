@@ -77,15 +77,7 @@ def get_oauth_client(service, key, secret, callback_url):
   A factory that will return the appropriate OAuth client.
   """
 
-  if service == TWITTER:
-    return TwitterClient(key, secret, callback_url)
-  elif service == YAHOO:
-    return YahooClient(key, secret, callback_url)
-  elif service == MYSPACE:
-    return MySpaceClient(key, secret, callback_url)
-  elif service == DROPBOX:
-    return DropboxClient(key, secret, callback_url)
-  elif service == LINKEDIN:
+  if service == LINKEDIN:
     return LinkedInClient(key, secret, callback_url)
   else:
     raise Exception, "Unknown OAuth service %s" % service
@@ -180,9 +172,11 @@ class OAuthClient():
     A urlfetch response object is returned.
     """
     logging.info("-----------------------------in make async request----------------------------")
-    
     payload = self.prepare_request(url, token, secret, additional_params,
                                    method)
+    # print payload
+    # payload = payload.replace("%2B", "+")
+    # print payload
 
     if method == urlfetch.GET:
       url = "%s?%s" % (url, payload)
@@ -199,7 +193,6 @@ class OAuthClient():
   def make_request(self, url, token="", secret="", additional_params=None,
                    protected=False, method=urlfetch.GET, headers={}):
     logging.info("-----------------------------IN MAKE REQUEST----------------------------")
-    
     return self.make_async_request(url, token, secret, additional_params,
                                    protected, method, headers).get_result()
 
@@ -263,7 +256,8 @@ class OAuthClient():
     returned.
     """
 
-    response = self.make_request(self.request_url)
+    response = self.make_request(self.request_url, additional_params={"scope":
+                                                     "r_fullprofile r_network r_emailaddress r_contactinfo"})
     result = self._extract_credentials(response)
 
     auth_token = result["token"]
@@ -335,205 +329,6 @@ class OAuthClient():
       "name": "",
       "picture": ""
     }
-
-
-class TwitterClient(OAuthClient):
-  """Twitter Client.
-
-  A client for talking to the Twitter API using OAuth as the
-  authentication model.
-  """
-
-  def __init__(self, consumer_key, consumer_secret, callback_url):
-    """Constructor."""
-
-    OAuthClient.__init__(self,
-        TWITTER,
-        consumer_key,
-        consumer_secret,
-        "http://api.twitter.com/oauth/request_token",
-        "http://api.twitter.com/oauth/access_token",
-        callback_url)
-
-  def get_authorization_url(self):
-    """Get Authorization URL."""
-
-    token = self._get_auth_token()
-    return "http://api.twitter.com/oauth/authorize?oauth_token=%s" % token
-
-  def get_authenticate_url(self):
-    """Get Authentication URL."""
-    token = self._get_auth_token()
-    return "http://api.twitter.com/oauth/authenticate?oauth_token=%s" % token
-
-  def _lookup_user_info(self, access_token, access_secret):
-    """Lookup User Info.
-
-    Lookup the user on Twitter.
-    """
-
-    response = self.make_request(
-        "http://api.twitter.com/account/verify_credentials.json",
-        token=access_token, secret=access_secret, protected=True)
-
-    data = json.loads(response.content)
-
-    user_info = self._get_default_user_info()
-    user_info["id"] = data["id"]
-    user_info["username"] = data["screen_name"]
-    user_info["name"] = data["name"]
-    user_info["picture"] = data["profile_image_url"]
-
-    return user_info
-
-
-class MySpaceClient(OAuthClient):
-  """MySpace Client.
-
-  A client for talking to the MySpace API using OAuth as the
-  authentication model.
-  """
-
-  def __init__(self, consumer_key, consumer_secret, callback_url):
-    """Constructor."""
-
-    OAuthClient.__init__(self,
-        MYSPACE,
-        consumer_key,
-        consumer_secret,
-        "http://api.myspace.com/request_token",
-        "http://api.myspace.com/access_token",
-        callback_url)
-
-  def get_authorization_url(self):
-    """Get Authorization URL."""
-
-    token = self._get_auth_token()
-    return ("http://api.myspace.com/authorize?oauth_token=%s"
-            "&oauth_callback=%s" % (token, urlquote(self.callback_url)))
-
-  def _lookup_user_info(self, access_token, access_secret):
-    """Lookup User Info.
-
-    Lookup the user on MySpace.
-    """
-
-    response = self.make_request("http://api.myspace.com/v1/user.json",
-        token=access_token, secret=access_secret, protected=True)
-
-    data = json.loads(response.content)
-
-    user_info = self._get_default_user_info()
-    user_info["id"] = data["userId"]
-    username = data["webUri"].replace("http://www.myspace.com/", "")
-    user_info["username"] = username
-    user_info["name"] = data["name"]
-    user_info["picture"] = data["image"]
-
-    return user_info
-
-
-class YahooClient(OAuthClient):
-  """Yahoo! Client.
-
-  A client for talking to the Yahoo! API using OAuth as the
-  authentication model.
-  """
-
-  def __init__(self, consumer_key, consumer_secret, callback_url):
-    """Constructor."""
-
-    OAuthClient.__init__(self,
-        YAHOO,
-        consumer_key,
-        consumer_secret,
-        "https://api.login.yahoo.com/oauth/v2/get_request_token",
-        "https://api.login.yahoo.com/oauth/v2/get_token",
-        callback_url)
-
-  def get_authorization_url(self):
-    """Get Authorization URL."""
-
-    token = self._get_auth_token()
-    return ("https://api.login.yahoo.com/oauth/v2/request_auth?oauth_token=%s"
-            % token)
-
-  def _lookup_user_info(self, access_token, access_secret):
-    """Lookup User Info.
-
-    Lookup the user on Yahoo!
-    """
-
-    user_info = self._get_default_user_info()
-
-    # 1) Obtain the user's GUID.
-    response = self.make_request(
-        "http://social.yahooapis.com/v1/me/guid", token=access_token,
-        secret=access_secret, additional_params={"format": "json"},
-        protected=True)
-
-    data = json.loads(response.content)["guid"]
-    guid = data["value"]
-
-    # 2) Inspect the user's profile.
-    response = self.make_request(
-        "http://social.yahooapis.com/v1/user/%s/profile/usercard" % guid,
-         token=access_token, secret=access_secret,
-         additional_params={"format": "json"}, protected=True)
-
-    data = json.loads(response.content)["profile"]
-
-    user_info["id"] = guid
-    user_info["username"] = data["nickname"].lower()
-    user_info["name"] = data["nickname"]
-    user_info["picture"] = data["image"]["imageUrl"]
-
-    return user_info
-
-
-class DropboxClient(OAuthClient):
-  """Dropbox Client.
-
-  A client for talking to the Dropbox API using OAuth as the authentication
-  model.
-  """
-
-  def __init__(self, consumer_key, consumer_secret, callback_url):
-    """Constructor."""
-
-    OAuthClient.__init__(self,
-        DROPBOX,
-        consumer_key,
-        consumer_secret,
-        "https://api.dropbox.com/0/oauth/request_token",
-        "https://api.dropbox.com/0/oauth/access_token",
-        callback_url)
-
-  def get_authorization_url(self):
-    """Get Authorization URL."""
-
-    token = self._get_auth_token()
-    return ("http://www.dropbox.com/0/oauth/authorize?"
-            "oauth_token=%s&oauth_callback=%s" % (token,
-                                                  urlquote(self.callback_url)))
-
-  def _lookup_user_info(self, access_token, access_secret):
-    """Lookup User Info.
-
-    Lookup the user on Dropbox.
-    """
-
-    response = self.make_request("http://api.dropbox.com/0/account/info",
-                                 token=access_token, secret=access_secret,
-                                 protected=True)
-
-    data = json.loads(response.content)
-    user_info = self._get_default_user_info()
-    user_info["id"] = data["uid"]
-    user_info["name"] = data["display_name"]
-    user_info["country"] = data["country"]
-
-    return user_info
     
 class LinkedInClient(OAuthClient):
   """LinkedIn Client.
@@ -549,7 +344,7 @@ class LinkedInClient(OAuthClient):
         LINKEDIN,
         consumer_key,
         consumer_secret,
-        "https://api.linkedin.com/uas/oauth/requestToken?scope=r_fullprofile+r_network+r_emailaddress+r_contactinfo",
+        "https://api.linkedin.com/uas/oauth/requestToken",
         "https://api.linkedin.com/uas/oauth/accessToken",
         callback_url)
 
@@ -583,6 +378,11 @@ class LinkedInClient(OAuthClient):
     user_info["picture"] = data["pictureUrl"]
     user_info["name"] = data["firstName"] + " " + data["lastName"]
     return user_info
+
+  def getSkills(self, access_token, access_secret):
+    response = self.make_request("http://api.linkedin.com/v1/people/~:(skills)", token=access_token, secret=access_secret, protected=False, headers={"x-li-format":"json"})
+    data = json.loads(response.content)
+    print data
 
 
 

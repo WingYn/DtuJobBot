@@ -23,9 +23,9 @@ def groupGraph(G, userNodeId):
     
     for SG in Gcc:
         if len(SG.nodes()) > 3:
-            bm, em, cm, dm = CentralityNoself(SG)
+            bm, cm, dm = CentralityNoself(SG)
             G.node[bm]['central'] =  1
-            G.node[em]['central'] =  2
+            #G.node[em]['central'] =  2
             G.node[cm]['central'] =  3
             G.node[dm]['central'] =  4
             
@@ -35,17 +35,17 @@ def CentralityNoself(G):
     """docstring for Centrality"""
     
     b = nx.betweenness_centrality(G)
-    e = nx.eigenvector_centrality_numpy(G)
+    #e = nx.eigenvector_centrality_numpy(G)
     c = nx.closeness_centrality(G)
     d = nx.degree_centrality(G)
 
     #get the max value
     bm = max(b.iteritems(), key=operator.itemgetter(1))[0]
-    em = max(e.iteritems(), key=operator.itemgetter(1))[0]
+    #em = max(e.iteritems(), key=operator.itemgetter(1))[0]
     cm = max(c.iteritems(), key=operator.itemgetter(1))[0]
     dm = max(d.iteritems(), key=operator.itemgetter(1))[0]
     
-    return bm, em, cm, dm
+    return bm, cm, dm#em, cm, dm
     
 def Centrality(G, userNodeId):
     """docstring for Centrality"""

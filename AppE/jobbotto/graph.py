@@ -9,12 +9,15 @@ from networkx.readwrite import json_graph
 class MainHandler(webapp2.RequestHandler): 
      
     def get(self):
-        G=nx.read_graphml('g.xml')
+        G=nx.read_graphml('newGraph.xml')
         G = G.to_undirected()
          
         for n in G.nodes():
-            G.node[n]['name'] = n
-            G.node[n]['central'] = 0
+            if G.degree(n) > 1 :
+                G.node[n]['name'] = n
+                G.node[n]['central'] = 0
+            else:
+                G.remove_node(n)
         #jsonGraph = json.dumps(dict(nodes=[G.node[n] for n in G.nodes()],links=[{'source':u,'target':v, 'value':1} for u,v in G.edges()]))
         #G = MainHandler.findCommunity(self, G, 'Sin')
         
@@ -47,8 +50,8 @@ class MainHandler(webapp2.RequestHandler):
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script>
 
-var width = 500,
-    height = 500;
+var width = 1000,
+    height = 1000;
 
 var color = d3.scale.category20();
 

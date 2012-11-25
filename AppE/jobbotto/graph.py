@@ -112,6 +112,11 @@ function drawG(graph) {
 drawG(jsonGraph);
 
 </script>""" % jsonGraph)
+
+class oleHandler(webapp2.RequestHandler):
+    
+    def get(self):
+         self.response.out.write("HEJ")
         
 app = webapp2.WSGIApplication([
     ('/graph', MainHandler)

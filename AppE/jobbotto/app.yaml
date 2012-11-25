@@ -13,7 +13,7 @@ handlers:
   static_files: miserables.json
   upload: miserables\.json
 
-- url: /graph
+- url: /graph.*
   script: graph.app
   
 - url: / 

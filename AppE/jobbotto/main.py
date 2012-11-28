@@ -26,6 +26,7 @@ import oauth
 
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import util
+from datetime import tzinfo, timedelta, datetime
 
 import logging
 import networkx as nx
@@ -39,6 +40,7 @@ class MainHandler(webapp.RequestHandler):
   def get(self, mode=""):
     application_key = "zt33uu6fiiw8"
     application_secret = "5e7rUflDxDLhXPYh"
+    beginning =  datetime.now ()
 
     # Fill in the next 2 lines after you have successfully logged in to
     # Twitter per the instructions above. This is the *user's* token and
@@ -58,6 +60,7 @@ class MainHandler(webapp.RequestHandler):
       return self.redirect(client.get_authorization_url())
 
     if mode == "verify":
+      beginning =  datetime.now () #store to game entity 
       auth_token = self.request.get("oauth_token")
       auth_verifier = self.request.get("oauth_verifier")
       auth_token_secret = self.request.get("oauth_token_secret")
@@ -73,7 +76,7 @@ class MainHandler(webapp.RequestHandler):
       data = client.make_request(url, token = user_token, secret = user_secret, additional_params={"format":"json" })
       # print data.content
 
-
+      
       g = nx.DiGraph()
       firstDegreeConnectionsId = {}
 
@@ -81,6 +84,10 @@ class MainHandler(webapp.RequestHandler):
       dictionary = json.loads(data.content)
       # logging.info("value of my var is %s", dictionary)
       firstDegreeConnections = []
+      
+      gametime = datetime.now () - beginning 
+      logging.info("oauthTook %s", gametime)
+      
       for v in dictionary['values']:
         s = v['firstName']
         s = s.encode('ascii', 'ignore')
@@ -96,6 +103,7 @@ class MainHandler(webapp.RequestHandler):
         g.add_edge(me.encode("latin-1"), i.encode("latin-1"))
 
 
+      beginning =  datetime.now () #store to game entity 
       for k, v in firstDegreeConnectionsId.iteritems():
           testurl = "http://api.linkedin.com/v1/people/id=%s:(relation-to-viewer:(related-connections))" % k
           data = client.make_request(connectionurl, token = user_token, secret = user_secret, additional_params={"format":"json" })
@@ -115,12 +123,14 @@ class MainHandler(webapp.RequestHandler):
           except KeyError:
             print "ble" 
         
-        
+      gametime = datetime.now () - beginning 
+      logging.info("First Degree %s", gametime)
       
+      beginning =  datetime.now () #store to game entity 
       
       url = "http://api.linkedin.com/v1/people/~:(skills)"
       data = client.make_request(url, token = user_token, secret = user_secret, additional_params={"format":"json" })
-      logging.info(data)
+      #logging.info(data)
       dictionary = json.loads(data.content)
       listOfSkills = []
       for value in dictionary['skills']['values']:
@@ -131,7 +141,12 @@ class MainHandler(webapp.RequestHandler):
       secondDegreeRelationIdsWithSkillSearchDict = {}
 
       listOfSkills = listOfSkills[:5]
-
+      
+      gametime = datetime.now () - beginning 
+      logging.info("List Of skills %s", gametime)
+      
+      beginning =  datetime.now () #store to game entity 
+      
       for i in listOfSkills:
         i = urllib.quote_plus(i)
         url = "http://api.linkedin.com/v1/people-search:(people:(relation-to-viewer,id,first-name,last-name,location:(name,country:(code),postal-code),connections))"
@@ -215,7 +230,9 @@ class MainHandler(webapp.RequestHandler):
                     g.add_edge(v.encode("latin-1"), ba.encode("latin-1"))
         except KeyError:
           print "ble"
-          
+    
+    gametime = datetime.now () - beginning 
+    logging.info("2 degree list of skills %s", gametime)      
     #her #g for graph
     if mode == "verify":
         if len(g.nodes()) > 2 and len(g.edges()) > 2 :

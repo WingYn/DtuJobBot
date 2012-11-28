@@ -18,7 +18,7 @@ def groupGraph(G, userNodeId):
         partition = community.best_partition(Gc)
     
     for nodes in partition.keys():
-        G.node[nodes]['group'] = partition[nodes] + 1
+        G.node[nodes]['group'] = (partition[nodes] + 1) * 2
     
     #For Connected Sub Graphs
     #Gcc=nx.connected_component_subgraphs(Gc)
@@ -33,9 +33,9 @@ def groupGraph(G, userNodeId):
         if len(SG.nodes()) > 3:
             bm, cm, dm = CentralityNoself(SG)
             G.node[bm]['central'] =  1
-            #G.node[em]['central'] =  2
-            G.node[cm]['central'] =  3
-            G.node[dm]['central'] =  4
+            #G.node[em]['central'] = 
+            G.node[cm]['central'] =  1
+            G.node[dm]['central'] =  1
             
     return G, len(set(partition.values()))
     
@@ -95,9 +95,9 @@ def DrawGraph(G, userNodeId):
 
         
     G.node[bm]['central'] =  1
-    G.node[em]['central'] =  2
-    G.node[cm]['central'] =  3
-    G.node[dm]['central'] =  4
+    G.node[em]['central'] =  1
+    G.node[cm]['central'] =  1
+    G.node[dm]['central'] =  1
         
     jsonGraph = json_graph.dumps(G)
     #self.response.out.write
@@ -155,7 +155,7 @@ def DrawGraph(G, userNodeId):
           .attr("class", "node")
           .attr("r", 5)
           .style("fill", function(d) { return color(d.group); })
-          .style("stroke", function(d) { return color(d.group + d.central); })
+          .style("stroke", function(d) { return color(d.group - d.central); })
           .style("stroke-width", "4")
           .call(force.drag);
 

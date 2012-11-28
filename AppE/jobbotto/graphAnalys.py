@@ -123,7 +123,7 @@ def DrawGraph(G, userNodeId):
     var width = 1000,
         height = 1000;
 
-    var color = d3.scale.category20();
+    var color = d3.scale.category10();
 
     var force = d3.layout.force()
         .charge(-500)

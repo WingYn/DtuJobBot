@@ -84,22 +84,20 @@ def DrawGraph(G, userNodeId):
     G = G.to_undirected()
          
     for n in G.nodes():
-        if G.degree(n) > 1 :
-            G.node[n]['name'] = n
-            G.node[n]['central'] = 0
-        else:
-            G.remove_node(n)
+        G.node[n]['name'] = n
+        G.node[n]['central'] = 0
+        
             #jsonGraph = json.dumps(dict(nodes=[G.node[n] for n in G.nodes()],links=[{'source':u,'target':v, 'value':1} for u,v in G.edges()]))
     #G = MainHandler.findCommunity(self, G, 'Sin')
         
-    #G, numOfGroups = groupGraph(G, userNodeId)
-    #bm, em, cm, dm = Centrality(G, userNodeId)
+    G, numOfGroups = groupGraph(G, userNodeId)
+    bm, em, cm, dm = Centrality(G, userNodeId)
 
         
-    #G.node[bm]['central'] =  1
-    #G.node[em]['central'] =  2
-    #G.node[cm]['central'] =  3
-    #G.node[dm]['central'] =  4
+    G.node[bm]['central'] =  1
+    G.node[em]['central'] =  2
+    G.node[cm]['central'] =  3
+    G.node[dm]['central'] =  4
         
     jsonGraph = json_graph.dumps(G)
     #self.response.out.write

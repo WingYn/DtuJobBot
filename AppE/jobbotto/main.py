@@ -186,6 +186,7 @@ class MainHandler(webapp.RequestHandler):
         data = client.make_request(url, token = user_token, secret = user_secret, additional_params={"facets":"network", "facet":"network,S", "format":"json", "start" :"50", "count" : "25", "keywords" : "%s" % i})
         jsondict = json.loads(data.content)
         for k, b in jsondict['people'].iteritems():
+          self.response.out.write("k")
           if k == 'values':
             for v in b:
               s = v['firstName']

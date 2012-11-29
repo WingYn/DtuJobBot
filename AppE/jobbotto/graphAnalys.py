@@ -18,7 +18,7 @@ def groupGraph(G, userNodeId):
         partition = community.best_partition(Gc)
     
     for nodes in partition.keys():
-        G.node[nodes]['group'] = (partition[nodes] + 1) * 2
+        G.node[nodes]['group'] = (partition[nodes] + 1)
     
     #For Connected Sub Graphs
     #Gcc=nx.connected_component_subgraphs(Gc)

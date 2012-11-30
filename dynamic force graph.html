@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+.node {
+  stroke: #fff;
+  stroke-width: 1.5px;
+}
+
+.link {
+  stroke: #999;
+  stroke-opacity: .6;
+}
+
+</style>
+<body>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script>
+
+// Inspired by http://bl.ocks.org/2432083
+
+var width = 960,
+    height = 500;
+
+var color = d3.scale.category20();
+
+var force = d3.layout.force()
+    .charge(-120)
+    .linkDistance(30)
+    .size([width, height]);
+
+var svg = d3.select("body").append("svg")
+	.attr("width", width)
+	.attr("height", height);
+
+var nodes = force.nodes(),
+	links = force.links();
+	  
+force.on("tick", function() {
+    link.attr("x1", function(d) { return d.source.x; })
+        .attr("y1", function(d) { return d.source.y; })
+        .attr("x2", function(d) { return d.target.x; })
+        .attr("y2", function(d) { return d.target.y; });
+
+    node.attr("cx", function(d) { return d.x; })
+        .attr("cy", function(d) { return d.y; });
+});
+
+var node_counter = 0;
+var link_counter = 0;
+  
+update = function(graph) {
+	for ( node_counter; node_counter < graph.nodes.length; node_counter++ ) {
+		nodes.push(graph.nodes[node_counter]);
+	}
+	for ( link_counter; link_counter < graph.links.length; link_counter++ ) {
+		links.push(graph.links[link_counter]);
+	}
+	
+	link = svg.selectAll("line.link")
+		.data(links)
+	  
+	link.enter().append("line")
+		.attr("class", "link")
+		.style("stroke-width", function(d) { return Math.sqrt(d.value); });
+
+	node = svg.selectAll("circle.node")
+		.data(nodes);
+	  
+	node.enter().append("circle")
+		.attr("class", "node")
+		.attr("r", 5)
+		.style("fill", function(d) { return color(d.group); })
+		.call(force.drag);
+
+	node.append("title")
+		.text(function(d) { return d.name; });
+		
+	force.start();
+}
+
+var jsongraph = [
+	{
+		"nodes":[
+			{"name":"Myriel","group":1},
+			{"name":"Napoleon","group":1},
+			{"name":"Mlle.Baptistine","group":1}
+		],
+		"links":[
+			{"source":1,"target":0,"value":1},
+			{"source":2,"target":0,"value":3}
+		]
+	},
+	{
+		"nodes":[
+			{"name":"Myriel","group":1},
+			{"name":"Napoleon","group":1},
+			{"name":"Mlle.Baptistine","group":1},
+			{"name":"Mme.Magloire","group":1},
+			{"name":"CountessdeLo","group":1},
+			{"name":"Geborand","group":1}
+		],
+		"links":[
+			{"source":1,"target":0,"value":1},
+			{"source":2,"target":0,"value":3},
+			{"source":3,"target":1,"value":4},
+			{"source":3,"target":2,"value":2},
+			{"source":4,"target":3,"value":1},
+			{"source":4,"target":1,"value":1},
+			{"source":5,"target":2,"value":1},
+			{"source":5,"target":3,"value":1}
+		]
+	},
+	{
+		"nodes":[
+			{"name":"Myriel","group":1},
+			{"name":"Napoleon","group":1},
+			{"name":"Mlle.Baptistine","group":1},
+			{"name":"Mme.Magloire","group":1},
+			{"name":"CountessdeLo","group":1},
+			{"name":"Geborand","group":1},
+			{"name":"Champtercier","group":1},
+			{"name":"Cravatte","group":1},
+			{"name":"Count","group":1},
+			{"name":"Test","group":1}
+		],
+		"links":[
+			{"source":1,"target":0,"value":1},
+			{"source":2,"target":0,"value":3},
+			{"source":3,"target":1,"value":4},
+			{"source":3,"target":2,"value":2},
+			{"source":4,"target":3,"value":1},
+			{"source":4,"target":1,"value":1},
+			{"source":5,"target":2,"value":1},
+			{"source":5,"target":3,"value":1},
+			{"source":6,"target":5,"value":2},
+			{"source":7,"target":1,"value":1},
+			{"source":7,"target":0,"value":1},
+			{"source":7,"target":2,"value":1},
+			{"source":7,"target":3,"value":1},
+			{"source":7,"target":4,"value":1},
+			{"source":8,"target":1,"value":5}
+		]
+	},
+	{
+		"nodes":[
+			{"name":"Myriel","group":1},
+			{"name":"Napoleon","group":1},
+			{"name":"Mlle.Baptistine","group":1},
+			{"name":"Mme.Magloire","group":1},
+			{"name":"CountessdeLo","group":1},
+			{"name":"Geborand","group":1},
+			{"name":"Champtercier","group":1},
+			{"name":"Cravatte","group":1},
+			{"name":"Count","group":1},
+			{"name":"Test","group":1},
+			{"name":"Helge","group":1},
+			{"name":"Sin","group":1},
+			{"name":"Lasse","group":1}
+		],
+		"links":[
+			{"source":1,"target":0,"value":1},
+			{"source":2,"target":0,"value":3},
+			{"source":3,"target":1,"value":4},
+			{"source":3,"target":2,"value":2},
+			{"source":4,"target":3,"value":1},
+			{"source":4,"target":1,"value":1},
+			{"source":5,"target":2,"value":1},
+			{"source":5,"target":3,"value":1},
+			{"source":6,"target":5,"value":2},
+			{"source":7,"target":1,"value":1},
+			{"source":7,"target":0,"value":1},
+			{"source":7,"target":2,"value":1},
+			{"source":7,"target":3,"value":1},
+			{"source":7,"target":4,"value":1},
+			{"source":8,"target":1,"value":5},
+			{"source":9,"target":8,"value":1},
+			{"source":10,"target":8,"value":1},
+			{"source":11,"target":8,"value":1},
+			{"source":12,"target":8,"value":8},
+			{"source":12,"target":7,"value":1}
+		]
+	},
+	{
+		"nodes":[
+			{"name":"Myriel","group":1},
+			{"name":"Napoleon","group":1},
+			{"name":"Mlle.Baptistine","group":1},
+			{"name":"Mme.Magloire","group":1},
+			{"name":"CountessdeLo","group":1},
+			{"name":"Geborand","group":1},
+			{"name":"Champtercier","group":1},
+			{"name":"Cravatte","group":1},
+			{"name":"Count","group":1},
+			{"name":"Test","group":1},
+			{"name":"Helge","group":1},
+			{"name":"Sin","group":1},
+			{"name":"Lasse","group":1}
+		],
+		"links":[
+			{"source":1,"target":0,"value":1},
+			{"source":2,"target":0,"value":3},
+			{"source":3,"target":1,"value":4},
+			{"source":3,"target":2,"value":2},
+			{"source":4,"target":3,"value":1},
+			{"source":4,"target":1,"value":1},
+			{"source":5,"target":2,"value":1},
+			{"source":5,"target":3,"value":1},
+			{"source":6,"target":5,"value":2},
+			{"source":7,"target":1,"value":1},
+			{"source":7,"target":0,"value":1},
+			{"source":7,"target":2,"value":1},
+			{"source":7,"target":3,"value":1},
+			{"source":7,"target":4,"value":1},
+			{"source":8,"target":1,"value":5},
+			{"source":9,"target":8,"value":1},
+			{"source":10,"target":8,"value":1},
+			{"source":11,"target":8,"value":1},
+			{"source":12,"target":8,"value":8},
+			{"source":12,"target":7,"value":1},
+			{"source":12,"target":4,"value":8},
+			{"source":4,"target":8,"value":8},
+			{"source":6,"target":3,"value":8},
+			{"source":9,"target":11,"value":8},
+			{"source":10,"target":11,"value":8}
+		]
+	},
+	{
+		"nodes":[
+			{"name":"Myriel","group":1},
+			{"name":"Napoleon","group":1},
+			{"name":"Mlle.Baptistine","group":1},
+			{"name":"Mme.Magloire","group":1},
+			{"name":"CountessdeLo","group":1},
+			{"name":"Geborand","group":1},
+			{"name":"Champtercier","group":1},
+			{"name":"Cravatte","group":1},
+			{"name":"Count","group":1},
+			{"name":"Test","group":1},
+			{"name":"Helge","group":1},
+			{"name":"Sin","group":1},
+			{"name":"Lasse","group":1},
+			{"name":"Sin2","group":1},
+			{"name":"Lasse2","group":1}
+		],
+		"links":[
+			{"source":1,"target":0,"value":1},
+			{"source":2,"target":0,"value":3},
+			{"source":3,"target":1,"value":4},
+			{"source":3,"target":2,"value":2},
+			{"source":4,"target":3,"value":1},
+			{"source":4,"target":1,"value":1},
+			{"source":5,"target":2,"value":1},
+			{"source":5,"target":3,"value":1},
+			{"source":6,"target":5,"value":2},
+			{"source":7,"target":1,"value":1},
+			{"source":7,"target":0,"value":1},
+			{"source":7,"target":2,"value":1},
+			{"source":7,"target":3,"value":1},
+			{"source":7,"target":4,"value":1},
+			{"source":8,"target":1,"value":5},
+			{"source":9,"target":8,"value":1},
+			{"source":10,"target":8,"value":1},
+			{"source":11,"target":8,"value":1},
+			{"source":12,"target":8,"value":8},
+			{"source":12,"target":7,"value":1},
+			{"source":12,"target":4,"value":8},
+			{"source":4,"target":8,"value":8},
+			{"source":6,"target":3,"value":8},
+			{"source":9,"target":11,"value":8},
+			{"source":10,"target":11,"value":8},
+			{"source":13,"target":11,"value":5},
+			{"source":14,"target":5,"value":5},
+			{"source":14,"target":1,"value":5}
+		]
+	}];
+
+setTimeout(function(){update(jsongraph[0])}, 0000);
+setTimeout(function(){update(jsongraph[1])}, 1000);
+setTimeout(function(){update(jsongraph[2])}, 2000);
+setTimeout(function(){update(jsongraph[3])}, 3000);
+setTimeout(function(){update(jsongraph[4])}, 4000);
+setTimeout(function(){update(jsongraph[5])}, 5000);
+
+</script>
+
+</html>

@@ -18,7 +18,7 @@ def groupGraph(G, userNodeId):
         partition = community.best_partition(Gc)
     
     for nodes in partition.keys():
-        G.node[nodes]['group'] = (partition[nodes] + 1)
+        G.node[nodes]['group'] = partition[nodes] + 1
     
     #For Connected Sub Graphs
     #Gcc=nx.connected_component_subgraphs(Gc)
@@ -33,15 +33,13 @@ def groupGraph(G, userNodeId):
         if len(SG.nodes()) > 3:
             bm, cm, dm = CentralityNoself(SG)
             G.node[bm]['central'] =  1
-            #G.node[em]['central'] = 
-            G.node[cm]['central'] =  1
-            G.node[dm]['central'] =  1
+            #G.node[em]['central'] =  2
+            G.node[cm]['central'] =  3
+            G.node[dm]['central'] =  4
             
     return G, len(set(partition.values()))
     
-def CentralityNoself(G):
-    """docstring for Centrality"""
-    
+def CentralityNoself(G):    
     b = nx.betweenness_centrality(G)
     #e = nx.eigenvector_centrality_numpy(G)
     c = nx.closeness_centrality(G)
@@ -95,12 +93,16 @@ def DrawGraph(G, userNodeId):
 
         
     G.node[bm]['central'] =  1
-    G.node[em]['central'] =  1
-    G.node[cm]['central'] =  1
-    G.node[dm]['central'] =  1
-        
+    G.node[em]['central'] =  2
+    G.node[cm]['central'] =  3
+    G.node[dm]['central'] =  4
+       
+    for i in G.nodes():
+        if G.degree(i) == 1:
+            G.remove_node(i) 
     jsonGraph = json_graph.dumps(G)
     #self.response.out.write
+    
     return ("""<!DOCTYPE html>
     <meta charset="utf-8">
     <style>
@@ -120,10 +122,10 @@ def DrawGraph(G, userNodeId):
     <script src="http://d3js.org/d3.v3.min.js"></script>
     <script>
 
-    var width = 1000,
+    var width = 1300,
         height = 1000;
 
-    var color = d3.scale.category10();
+    var color = d3.scale.category20();
 
     var force = d3.layout.force()
         .charge(-500)
@@ -155,7 +157,7 @@ def DrawGraph(G, userNodeId):
           .attr("class", "node")
           .attr("r", 5)
           .style("fill", function(d) { return color(d.group); })
-          .style("stroke", function(d) { return color(d.group - d.central); })
+          .style("stroke", function(d) { return color(d.group + d.central); })
           .style("stroke-width", "4")
           .call(force.drag);
 
@@ -185,4 +187,5 @@ def DrawGraph(G, userNodeId):
     drawG(jsonGraph);
 
     </script>""" % jsonGraph)
-    
+
+

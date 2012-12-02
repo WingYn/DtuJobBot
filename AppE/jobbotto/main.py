@@ -4,7 +4,6 @@ import jinja2
 import os
 import graphAnalys as ga
 import networkx as nx
-import link_clustering as lc
 import logging
 
 jinja_environment = jinja2.Environment(loader=jinja2.FileSystemLoader(os.path.dirname(__file__)))

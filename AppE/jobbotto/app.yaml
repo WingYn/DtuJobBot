@@ -1,0 +1,34 @@
+application: dtujobbot
+version: 1
+runtime: python27
+api_version: 1
+threadsafe: yes
+
+handlers:
+- url: /favicon\.ico
+  static_files: favicon.ico
+  upload: favicon\.ico
+  
+- url: /miserables\.json
+  static_files: miserables.json
+  upload: miserables\.json
+
+- url: /graph
+  script: graph.app
+  
+- url: /
+  script: main.app
+
+- url: /generategraph/.*
+  script: LinkedInGenerateGraph.app
+
+libraries:
+- name: webapp2
+  version: "2.5.1"
+- name: django
+  version: "1.3"
+- name: jinja2
+  version: latest
+  
+- name: numpy
+  version: latest
